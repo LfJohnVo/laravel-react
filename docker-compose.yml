@@ -1,0 +1,70 @@
+version: "3.8"
+services:
+  nginx-back-laravelreact:
+    image: nginx:stable-alpine
+    container_name: nginx-laravelreact
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 443:443
+      - 8080:80
+    volumes:
+      - .:/var/www/html
+      - ./backend/infra/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - mysql-laravelreact
+      - redis-laravelreact
+    networks:
+      - laravelreactnetwork
+
+  mysql-laravelreact:
+    image: mysql:8.0
+    container_name: mysql-laravelreact
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 33066:3306
+    volumes:
+      - laravelreact-db:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "homestead"
+      MYSQL_USER: "homestead"
+      MYSQL_PASSWORD: "secret"
+      MYSQL_ROOT_PASSWORD: "secret"
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - laravelreactnetwork
+
+  php:
+    build:
+      context: "./backend/infra/php/"
+      dockerfile: Dockerfile
+    container_name: php-laravelreact
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./backend:/var/www/html
+    ports:
+      - 9000:80
+    networks:
+      - laravelreactnetwork
+
+  redis-laravelreact:
+    image: redis:alpine
+    container_name: redis-laravelreact
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./backend/infra/redis/redis.conf:/usr/local/etc/redis/redis.conf # Mount the Redis configuration file
+    networks:
+      - laravelreactnetwork
+    mem_limit: 2g
+
+volumes:
+  laravelreact-db:
+    driver: local
+
+networks:
+  laravelreactnetwork:
