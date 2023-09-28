@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Filters\UserFilters;
+use Essa\APIToolKit\Filters\Filterable;
 
 /**
  * App\Models\User
@@ -31,18 +33,26 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User wherePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
- * @mixin \Eloquent
  * @property int $role_id
  * @property-read \App\Models\Role $role
  * @method static \Illuminate\Database\Eloquent\Builder|User whereRoleId($value)
+ * @property string|null $email_verified_at
+ * @property string|null $remember_token
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereEmailVerifiedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|User whereRememberToken($value)
+ * @mixin \Eloquent
  */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, Filterable;
 
     protected $guarded = [];
 
     protected $hidden = ['password'];
+
+    protected string $default_filters = UserFilters::class;
+
 
     public function role()
     {
